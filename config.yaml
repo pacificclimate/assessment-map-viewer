@@ -1,0 +1,15 @@
+# Northeast Assessment Config Options
+base_path: "/home/ssobie/Desktop/Data/Climate_Assessments/Northeast_2025/"
+
+category_order:
+  - Precipitation_Indices
+  - Temperature_Indices
+  - Drought_Indices
+  - Return_Levels
+  - Return_Period_Changes
+
+region_order:
+  - Northeast
+  - Chetwynd
+  - Dawson_Creek
+  - Doig_River

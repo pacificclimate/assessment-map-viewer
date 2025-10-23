@@ -1,6 +1,17 @@
 import panel as pn
 import os
 import io
+import yaml
+
+# --- Load configuration options ---
+CONFIG_FILE = "config.yaml"
+
+with open(CONFIG_FILE, "r") as f:
+    config = yaml.safe_load(f)
+
+BASE_PATH = config["base_path"]
+CAT_ORDER = config.get("category_order", [])
+REGION_OPTIONS = config.get("region_order", [])
 
 #pn.extension()
 pn.extension(raw_css=[
@@ -22,14 +33,14 @@ pn.extension(raw_css=[
 ])
 
 #BASE_PATH = "/home/ssobie/Desktop/Python/Map_App/Images/"
-BASE_PATH = "/home/ssobie/Desktop/Data/Climate_Assessments/Northeast_2025/"
+#BASE_PATH = "/home/ssobie/Desktop/Data/Climate_Assessments/Northeast_2025/"
 MAPS_PATH = BASE_PATH + 'Maps_with_ERA5'
 TABLES_PATH = BASE_PATH + 'Tables'
 
 # Widgets
 scenario = pn.widgets.Select(
     name='Scenario', 
-    options=['Select Scenario', 'Maps_SSP245', 'Maps_SSP585'], 
+    options=['Select Scenario' , 'Maps_SSP245', 'Maps_SSP585'], 
     value='Select Scenario',
     styles={'font-size': '14pt'} 
 )
@@ -37,6 +48,13 @@ scenario = pn.widgets.Select(
 category = pn.widgets.Select(name='Category', options=[],styles={'font-size': '14pt'})
 variable = pn.widgets.Select(name='Variable', options=[],styles={'font-size': '14pt'})
 map = pn.widgets.Select(name='Choose a Map', options=[],styles={'font-size': '14pt'})
+
+region = pn.widgets.Select(
+    name='Region',
+    options=REGION_OPTIONS,
+    value=REGION_OPTIONS[0] if REGION_OPTIONS else None,
+    styles={'font-size': '14pt'}
+)
 
 # Download Map button
 download_map = pn.widgets.FileDownload(
@@ -55,9 +73,6 @@ download_table = pn.widgets.FileDownload(
     embed=False,
     disabled=True  # Start disabled
 )
-
-CAT_ORDER = ["Precipitation_Indices", "Temperature_Indices", "Drought_Indices",
-             "Return_Levels","Return_Period_Changes"]
 
 # Update categories when scenario changes
 def update_categories(event):
