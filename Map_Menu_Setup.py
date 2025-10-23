@@ -22,7 +22,7 @@ pn.extension(raw_css=[
 ])
 
 #BASE_PATH = "/home/ssobie/Desktop/Python/Map_App/Images/"
-BASE_PATH = "/home/ssobie/Desktop/Data/Climate_Assessments/CVRD_2025/Maps_with_ERA5/"
+BASE_PATH = "/home/ssobie/Desktop/Data/Climate_Assessments/Northeast_2025/Maps_with_ERA5/"
 
 
 # Widgets
@@ -54,7 +54,7 @@ def update_categories(event):
         if os.path.isdir(new_path):
             dirs = sorted([d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))])
             category.options = dirs
-            category.value = dirs[0] if dirs else None
+            category.value = None #dirs[0] if dirs else None
         else:
             category.options = []
             category.value = None
@@ -74,7 +74,7 @@ def update_variables(event):
         if os.path.isdir(new_path):
             dirs = sorted([d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))])
             variable.options = dirs
-            variable.value = dirs[0] if dirs else None
+            variable.value = None #dirs[0] if dirs else None
         else:
             variable.options = []
             variable.value = None
@@ -90,7 +90,7 @@ def update_maps(event):
         if os.path.isdir(new_path):
             files = sorted([f for f in os.listdir(new_path) if os.path.isfile(os.path.join(new_path, f))])
             map.options = files
-            map.value = files[0] if files else None
+            map.value = None #files[0] if files else None
         else:
             map.options = []
             map.value = None
