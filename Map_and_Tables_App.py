@@ -4,7 +4,7 @@ import io
 import yaml
 
 # --- Load configuration options ---
-CONFIG_FILE = "config.yaml"
+CONFIG_FILE = "Northeast_config.yaml"
 
 with open(CONFIG_FILE, "r") as f:
     config = yaml.safe_load(f)
@@ -33,10 +33,8 @@ pn.extension(raw_css=[
     """
 ])
 
-#BASE_PATH = "/home/ssobie/Desktop/Python/Map_App/Images/"
-#BASE_PATH = "/home/ssobie/Desktop/Data/Climate_Assessments/Northeast_2025/"
-MAPS_PATH = BASE_PATH + 'Maps_with_ERA5'
-TABLES_PATH = BASE_PATH + 'Tables_with_ERA5'
+MAPS_PATH = BASE_PATH + 'Maps' #'Maps_with_ERA5'
+TABLES_PATH = BASE_PATH + 'Tables' #'Tables_with_ERA5'
 
 # Widgets
 scenario = pn.widgets.Select(
@@ -51,9 +49,10 @@ variable = pn.widgets.Select(name='Variable', options=[],styles={'font-size': '1
 map = pn.widgets.Select(name='Choose a Map', options=[],styles={'font-size': '14pt'})
 
 REGION_OPTIONS.insert(0,'Select Region')
+DISPLAY_REGIONS = {d.replace("_", " "): d for d in REGION_OPTIONS}
 region = pn.widgets.Select(
     name='Region',
-    options=REGION_OPTIONS,
+    options=DISPLAY_REGIONS,
     value=REGION_OPTIONS[0] if REGION_OPTIONS else None,
     styles={'font-size': '14pt'}
 )
@@ -79,7 +78,7 @@ download_table = pn.widgets.FileDownload(
 # Update categories when scenario changes
 def update_categories(event):
     if scenario.value != 'Select Scenario':
-        new_path = os.path.join(MAPS_PATH, 'Maps_'+scenario.value)
+        new_path = os.path.join(MAPS_PATH, scenario.value) #'Maps_'+
         if os.path.isdir(new_path):
             found_dirs = [d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))]
             dirs = [d for d in CAT_ORDER if d in found_dirs]
@@ -102,7 +101,7 @@ def update_categories(event):
 # Update variables when category changes
 def update_variables(event):
     if scenario.value != 'Select Scenario' and category.value:
-        new_path = os.path.join(MAPS_PATH, 'Maps_'+scenario.value, category.value)
+        new_path = os.path.join(MAPS_PATH, scenario.value, category.value) #'Maps_'+
         if os.path.isdir(new_path):
             dirs = sorted([d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))])
             variable.options = dirs
@@ -118,7 +117,7 @@ def update_variables(event):
 # Update maps when variable changes
 def update_maps(event):
     if scenario.value != 'Select Scenario' and variable.value:
-        new_path = os.path.join(MAPS_PATH, 'Maps_'+scenario.value, category.value, variable.value)
+        new_path = os.path.join(MAPS_PATH, scenario.value, category.value, variable.value) #'Maps_'+
         if os.path.isdir(new_path):
             files = sorted([f for f in os.listdir(new_path) if os.path.isfile(os.path.join(new_path, f))])
             map.options = files
@@ -174,7 +173,7 @@ def display_selection(scenario_val, category_val, variable_val, map_val):
 - Map: Choose a Map
 - Table: Choose a Table
 """)
-    path_display = os.path.join(MAPS_PATH, 'Maps_'+scenario_val or '', category_val or '', variable_val or '', map_val or '')
+    path_display = os.path.join(MAPS_PATH, scenario_val or '', category_val or '', variable_val or '', map_val or '') # 'Maps_'+
 
     # If an image file is selected → display the image
     if map_val and os.path.isfile(path_display) and path_display.lower().endswith('.png'):
