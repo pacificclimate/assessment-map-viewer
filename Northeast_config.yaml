@@ -1,5 +1,5 @@
 # Northeast Assessment Config Options
-base_path: "/home/ssobie/Desktop/Data/Climate_Assessments/Northeast_2025/"
+base_path: "/storage/data/projects/rci/data/assessments/Northeast_2025/App_Files/"
 
 category_order:
   - Precipitation_Indices
