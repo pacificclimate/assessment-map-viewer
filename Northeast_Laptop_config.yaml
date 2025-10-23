@@ -1,0 +1,23 @@
+# Northeast Assessment Config Options
+base_path: "/home/ssobie/Desktop/Data/Climate_Assessments/Northeast_2025/"
+
+category_order:
+  - Precipitation_Indices
+  - Temperature_Indices
+  - Drought_Indices
+  - Return_Levels
+  - Return_Period_Changes
+
+region_order:
+  - Northeast
+  - Chetwynd
+  - Dawson_Creek
+  - Doig_River_FN
+  - Fort_Nelson
+  - Fort_St_John
+  - Northern_Rockies_Municipality
+  - Peace_Highlands
+  - Peace_Lowlands
+  - Peace_Regional_District
+  - Tumbler_Ridge
+  - West_Moberly_FN
