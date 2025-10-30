@@ -1,9 +1,12 @@
 # Northeast Assessment Config Options
 base_path: "/storage/data/projects/rci/data/assessments/Northeast_2025/App_Files/"
+logo_path: "./PCICLogoHorizontal.png"
+app_title: "Northeast Assessment Viewer"
 
 category_order:
   - Precipitation_Indices
   - Temperature_Indices
+  - Heatwave_Indices
   - Drought_Indices
   - Return_Levels
   - Return_Period_Changes
