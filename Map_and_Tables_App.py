@@ -39,11 +39,18 @@ pn.extension(raw_css=[
 MAPS_PATH = BASE_PATH + 'Maps'
 TABLES_PATH = BASE_PATH + 'Tables'
 
-# Widgets
+# Map Scenario Menu
 scenario = pn.widgets.Select(
-    name='Scenario', 
-    options=['Select Scenario' , 'SSP245', 'SSP585'], 
-    value='Select Scenario',
+    name='Map Scenario', 
+    options=['Select Map Scenario' , 'SSP245', 'SSP585'], 
+    value='Select Map Scenario',
+    styles={'font-size': '14pt'} 
+)
+# Map Scenario Menu
+tablescen = pn.widgets.Select(
+    name='Table Scenario', 
+    options=['Select Table Scenario' , 'SSP245', 'SSP585'], 
+    value='Select Table Scenario',
     styles={'font-size': '14pt'} 
 )
 
@@ -136,7 +143,7 @@ def update_maps(event):
 # Summary Table File Selection
 def update_region_file(event):
     region_name = region.value
-    scenario_name = scenario.value
+    scenario_name = tablescen.value
     if not region_name:
         download_table.disabled = True
         return
@@ -159,13 +166,13 @@ def update_region_file(event):
 scenario.param.watch(update_categories, 'value')
 category.param.watch(update_variables, 'value')
 variable.param.watch(update_maps, 'value')
+tablescen.param.watch(update_region_file, 'value')
 region.param.watch(update_region_file, "value")
-
 
 # Function updated to accept all bound widget values
 def display_selection(scenario_val, category_val, variable_val, map_val):
     # Show only placeholder names if scenario not selected
-    if scenario_val == 'Select Scenario' or not scenario_val:
+    if scenario_val == 'Select Map Scenario' or not scenario_val:
         download_map.disabled = True
         return pn.pane.Markdown(f"""
 **Selection Options:**
@@ -220,11 +227,11 @@ else:
 title_pane = pn.pane.HTML(
     f"""
     <div style='
-        font-size: 24pt;
+        font-size: 20pt;
         font-weight: bold;
         text-align: center;
-        color: #004d80;
-        background-color: #f7f9fc;
+        color: #004361;
+        background-color: #FFFFFF;
         padding: 10px;
         border-radius: 0px;
         margin-bottom: 0px;
@@ -242,7 +249,7 @@ display_pane = pn.bind(
 )
 
 sidebar = pn.Column(
-    pn.pane.Markdown("## 🗺️ Maps", styles={"font-size": "14pt", 
+    pn.pane.Markdown("## 🗺️ Maps", styles={"font-size": "12pt", 
                                             "font-weight": "bold",
                                             "margin-top": "0px",
                                             "margin-bottom": "0px"}),  # 👈 Section title   
@@ -254,7 +261,8 @@ sidebar = pn.Column(
     download_map,
     pn.layout.Spacer(height=10),
     pn.layout.Divider(),
-    pn.pane.Markdown("## 📊 Tables", styles={"font-size": "14pt", "font-weight": "bold"}),  # 👈 Second section title
+    pn.pane.Markdown("## 📊 Tables", styles={"font-size": "12pt", "font-weight": "bold"}),  # 👈 Second section title
+    tablescen,
     region,
     pn.layout.Spacer(height=10),
     download_table,
