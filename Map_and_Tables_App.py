@@ -4,9 +4,10 @@ import io
 import yaml
 
 # --- Load configuration options ---
-###CONFIG_FILE = "Northeast_config.yaml"
-CONFIG_FILE = "Northeast_Laptop_config.yaml"
+CONFIG_FILE = os.getenv("APP_CONFIG", "config.yaml")
 
+if not os.path.isfile(CONFIG_FILE):
+    raise FileNotFoundError(f"Config file not found: {CONFIG_FILE}")
 
 with open(CONFIG_FILE, "r") as f:
     config = yaml.safe_load(f)
@@ -17,7 +18,6 @@ REGION_OPTIONS = config.get("region_order", [])
 LOGO_PATH = config.get("logo_path", None)
 APP_TITLE = config.get("app_title", "Data Explorer")
 
-#pn.extension()
 pn.extension(raw_css=[
     """
     select, .bk-input {
