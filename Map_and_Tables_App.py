@@ -4,7 +4,10 @@ import io
 import yaml
 
 # --- Load configuration options ---
-CONFIG_FILE = "Northeast_config.yaml"
+CONFIG_FILE = os.getenv("APP_CONFIG", "config.yaml")
+
+if not os.path.isfile(CONFIG_FILE):
+    raise FileNotFoundError(f"Config file not found: {CONFIG_FILE}")
 
 with open(CONFIG_FILE, "r") as f:
     config = yaml.safe_load(f)
@@ -12,13 +15,13 @@ with open(CONFIG_FILE, "r") as f:
 BASE_PATH = config["base_path"]
 CAT_ORDER = config.get("category_order", [])
 REGION_OPTIONS = config.get("region_order", [])
+LOGO_PATH = config.get("logo_path", None)
+APP_TITLE = config.get("app_title", "Data Explorer")
 
-
-#pn.extension()
 pn.extension(raw_css=[
     """
     select, .bk-input {
-        font-size: 14pt !important;
+        font-size: 12pt !important;
     }
     """
 ])
@@ -27,20 +30,27 @@ pn.extension(raw_css=[
     """
     /* Increase font size for all Panel buttons */
     .bk-btn, .bk-btn-primary {
-        font-size: 16pt !important;
+        font-size: 14pt !important;
         padding: 3px 6px !important;
     }
     """
 ])
 
-MAPS_PATH = BASE_PATH + 'Maps' #'Maps_with_ERA5'
-TABLES_PATH = BASE_PATH + 'Tables' #'Tables_with_ERA5'
+MAPS_PATH = BASE_PATH + 'Maps'
+TABLES_PATH = BASE_PATH + 'Tables'
 
-# Widgets
+# Map Scenario Menu
 scenario = pn.widgets.Select(
-    name='Scenario', 
-    options=['Select Scenario' , 'SSP245', 'SSP585'], 
-    value='Select Scenario',
+    name='Map Scenario', 
+    options=['Select Map Scenario' , 'SSP245', 'SSP585'], 
+    value='Select Map Scenario',
+    styles={'font-size': '14pt'} 
+)
+# Map Scenario Menu
+tablescen = pn.widgets.Select(
+    name='Table Scenario', 
+    options=['Select Table Scenario' , 'SSP245', 'SSP585'], 
+    value='Select Table Scenario',
     styles={'font-size': '14pt'} 
 )
 
@@ -133,7 +143,7 @@ def update_maps(event):
 # Summary Table File Selection
 def update_region_file(event):
     region_name = region.value
-    scenario_name = scenario.value
+    scenario_name = tablescen.value
     if not region_name:
         download_table.disabled = True
         return
@@ -156,13 +166,13 @@ def update_region_file(event):
 scenario.param.watch(update_categories, 'value')
 category.param.watch(update_variables, 'value')
 variable.param.watch(update_maps, 'value')
+tablescen.param.watch(update_region_file, 'value')
 region.param.watch(update_region_file, "value")
-
 
 # Function updated to accept all bound widget values
 def display_selection(scenario_val, category_val, variable_val, map_val):
     # Show only placeholder names if scenario not selected
-    if scenario_val == 'Select Scenario' or not scenario_val:
+    if scenario_val == 'Select Map Scenario' or not scenario_val:
         download_map.disabled = True
         return pn.pane.Markdown(f"""
 **Selection Options:**
@@ -172,7 +182,11 @@ def display_selection(scenario_val, category_val, variable_val, map_val):
 - Variable: Select Variable  
 - Map: Choose a Map
 - Table: Choose a Table
-""")
+""",
+    styles={
+        "font-size": "14pt",
+        "line-height": "1.2",
+    })
     path_display = os.path.join(MAPS_PATH, scenario_val or '', category_val or '', variable_val or '', map_val or '') # 'Maps_'+
 
     # If an image file is selected → display the image
@@ -198,6 +212,33 @@ def display_selection(scenario_val, category_val, variable_val, map_val):
 - Path: {path_display}
 """)
 
+# PCIC Logo
+if LOGO_PATH and os.path.isfile(LOGO_PATH):
+    logo_pane = pn.pane.PNG(
+        LOGO_PATH,
+        width=300,           # adjust as needed
+        align="start",
+        styles={"margin-top": "10px"}
+    )
+else:
+    logo_pane = pn.pane.Markdown("")  # empty placeholder if logo missing
+
+# App Title
+title_pane = pn.pane.HTML(
+    f"""
+    <div style='
+        font-size: 20pt;
+        font-weight: bold;
+        text-align: center;
+        color: #004361;
+        background-color: #FFFFFF;
+        padding: 10px;
+        border-radius: 0px;
+        margin-bottom: 0px;
+    '>{APP_TITLE}</div>
+    """
+)
+
 # Bind widget values explicitly
 display_pane = pn.bind(
     display_selection,
@@ -208,27 +249,37 @@ display_pane = pn.bind(
 )
 
 sidebar = pn.Column(
-    pn.pane.Markdown("## 🗺️ Maps", styles={"font-size": "16pt", "font-weight": "bold"}),  # 👈 Section title   
+    pn.pane.Markdown("## 🗺️ Maps", styles={"font-size": "12pt", 
+                                            "font-weight": "bold",
+                                            "margin-top": "0px",
+                                            "margin-bottom": "0px"}),  # 👈 Section title   
     scenario, 
     category, 
     variable, 
     map, 
-    pn.layout.Spacer(height=10),
-    pn.pane.HTML("<style>.bk-btn {font-size: 18pt !important;}</style>"),
+    pn.pane.HTML("<style>.bk-btn {font-size: 16pt !important;}</style>"),
     download_map,
-    pn.layout.Spacer(height=30),
+    pn.layout.Spacer(height=10),
     pn.layout.Divider(),
-    pn.layout.Spacer(height=20),
-    pn.pane.Markdown("## 📊 Tables", styles={"font-size": "16pt", "font-weight": "bold"}),  # 👈 Second section title
+    pn.pane.Markdown("## 📊 Tables", styles={"font-size": "12pt", "font-weight": "bold"}),  # 👈 Second section title
+    tablescen,
     region,
+    pn.layout.Spacer(height=10),
     download_table,
+    pn.layout.Spacer(height=10),
+    pn.layout.Divider(),
+    pn.layout.Spacer(height=10),
+    logo_pane,
     width=400,
 )
 
 # Layout
-layout = pn.Row(
-    sidebar,
-    display_pane
+layout = pn.Column(
+    title_pane,
+    pn.Row(
+        sidebar,
+        display_pane
+    ),
 )
 
 layout.servable()
