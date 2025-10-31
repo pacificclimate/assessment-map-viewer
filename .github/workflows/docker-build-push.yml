@@ -9,8 +9,7 @@ on:
     types: [ published ]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  DOCKERHUB_REGISTRY: docker.io
 
 jobs:
   build-and-push:
@@ -23,18 +22,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Log in to Container Registry
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
       uses: docker/login-action@v3
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: ${{ env.DOCKERHUB_REGISTRY }}
+        username: ${{ secrets.pcicdevops_at_dockerhub_username }}
+        password: ${{ secrets.pcicdevops_at_dockerhub_password }}
 
-    - name: Extract metadata
-      id: meta
+    - name: Extract metadata for Docker Hub
+      id: meta-dockerhub
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.DOCKERHUB_REGISTRY }}/pcic/assessment-map-viewer
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -42,11 +44,13 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=sha
 
-    - name: Build and push Docker image
+    - name: Build and push to Docker Hub
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./docker/Dockerfile
+        platforms: linux/amd64,linux/arm64
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: |
+          ${{ steps.meta-dockerhub.outputs.tags }}
+        labels: ${{ steps.meta-dockerhub.outputs.labels }}
