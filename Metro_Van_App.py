@@ -17,6 +17,7 @@ CAT_ORDER = config.get("category_order", [])
 REGION_OPTIONS = config.get("region_order", [])
 LOGO_PATH = config.get("logo_path", None)
 APP_TITLE = config.get("app_title", "Data Explorer")
+ADDED_TABLES = config.get("added_tables", [])
 
 pn.extension(raw_css=[
     """
@@ -37,16 +38,18 @@ pn.extension(raw_css=[
 ])
 
 MAPS_PATH = BASE_PATH + 'Maps'
-TABLES_PATH = BASE_PATH + 'Tables'
+TABLES_PATH = BASE_PATH + 'Summary_Tables'
+GRAPHICS_PATH = BASE_PATH + 'Infographics'
+ADDED_PATH = BASE_PATH + 'Site_Tables' # For additional variables not in the summary tables
 
 # Map Scenario Menu
 scenario = pn.widgets.Select(
     name='Map Scenario', 
-    options=['Select Map Scenario' , 'SSP245', 'SSP585'], 
+    options=['Select Map Scenario' , 'RCP85', 'SSP245', 'SSP585'], 
     value='Select Map Scenario',
     styles={'font-size': '14pt'} 
 )
-# Map Scenario Menu
+# Table Scenario Menu
 tablescen = pn.widgets.Select(
     name='Table Scenario', 
     options=['Select Table Scenario' , 'SSP245', 'SSP585'], 
@@ -54,9 +57,18 @@ tablescen = pn.widgets.Select(
     styles={'font-size': '14pt'} 
 )
 
+# Infographic Scenario Menu
+graphicscen = pn.widgets.Select(
+    name='Infographic Scenario', 
+    options=['Select Infographic Scenario' , 'SSP245', 'SSP585'], 
+    value='Select Infographic Scenario',
+    styles={'font-size': '14pt'} 
+)
+
 category = pn.widgets.Select(name='Category', options=[],styles={'font-size': '14pt'})
 variable = pn.widgets.Select(name='Variable', options=[],styles={'font-size': '14pt'})
 map = pn.widgets.Select(name='Choose a Map', options=[],styles={'font-size': '14pt'})
+infographics = pn.widgets.Select(name='Choose an Infographic', options=[],styles={'font-size': '14pt'})
 
 REGION_OPTIONS.insert(0,'Select Region')
 DISPLAY_REGIONS = {d.replace("_", " "): d for d in REGION_OPTIONS}
@@ -64,6 +76,15 @@ region = pn.widgets.Select(
     name='Region',
     options=DISPLAY_REGIONS,
     value=REGION_OPTIONS[0] if REGION_OPTIONS else None,
+    styles={'font-size': '14pt'}
+)
+
+ADDED_TABLES.insert(0,'Select Variable Table')
+DISPLAY_ADDED = {d.replace("_", " "): d for d in ADDED_TABLES}
+added = pn.widgets.Select(
+    name='Additional Variables',
+    options=DISPLAY_ADDED,
+    value=ADDED_TABLES[0] if ADDED_TABLES else None,
     styles={'font-size': '14pt'}
 )
 
@@ -85,9 +106,27 @@ download_table = pn.widgets.FileDownload(
     disabled=True  # Start disabled
 )
 
+# Download Infographic button
+download_infographic = pn.widgets.FileDownload(
+    label="⬇️ Download Infographic",
+    button_type="success",
+    filename="Graphic.png",
+    embed=False,
+    disabled=True  # Start disabled
+)
+
+# Download Wind button
+download_added = pn.widgets.FileDownload(
+    label="⬇️ Download Variable Table",
+    button_type="success",
+    filename="Table.xlsx",
+    embed=False,
+    disabled=True  # Start disabled
+)
+
 # Update categories when scenario changes
 def update_categories(event):
-    if scenario.value != 'Select Scenario':
+    if scenario.value != 'Select Map Scenario':
         new_path = os.path.join(MAPS_PATH, scenario.value) #'Maps_'+
         if os.path.isdir(new_path):
             found_dirs = [d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))]
@@ -110,7 +149,7 @@ def update_categories(event):
 
 # Update variables when category changes
 def update_variables(event):
-    if scenario.value != 'Select Scenario' and category.value:
+    if scenario.value != 'Select Map Scenario' and category.value:
         new_path = os.path.join(MAPS_PATH, scenario.value, category.value) #'Maps_'+
         if os.path.isdir(new_path):
             dirs = sorted([d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))])
@@ -163,11 +202,54 @@ def update_region_file(event):
     else:
         download_table.disabled = True
 
+# Additional Variables Table File Selection
+def update_added_table(event):
+    added_name = added.value
+    if not added_name:
+        download_added.disabled = True
+        return
+
+    # Construct expected Excel file path
+    added_file = os.path.join(ADDED_PATH, f"{added_name}_Table.xlsx")
+
+    if os.path.isfile(added_file):
+        # Enable the button and set callback
+        download_added.disabled = False
+        download_added.filename = f"{added_name}_Table.xlsx"
+
+        def get_added_file():
+            with open(added_file, "rb") as f:
+                return io.BytesIO(f.read())
+        download_added.callback = get_added_file
+    else:
+        download_added.disabled = True
+
+# Infographic File List
+def update_infographics(event):
+    if graphicscen.value != 'Select Infographic Scenario':
+        scenario_name = graphicscen.value
+        if os.path.isdir(GRAPHICS_PATH):
+            scen_files = []
+            for f in os.listdir(GRAPHICS_PATH):
+                if os.path.isfile(os.path.join(GRAPHICS_PATH, f)) and scenario_name in f:
+                    scen_files.append(f)
+            infographics.options = scen_files
+            infographics.value = None #files[0] if files else None
+        else:
+            infographics.options = []
+            infographics.value = None
+            download_infographic.disabled = True
+
+
+
 scenario.param.watch(update_categories, 'value')
 category.param.watch(update_variables, 'value')
 variable.param.watch(update_maps, 'value')
 tablescen.param.watch(update_region_file, 'value')
 region.param.watch(update_region_file, "value")
+graphicscen.param.watch(update_infographics, 'value')
+added.param.watch(update_added_table, 'value')
+
 
 # Function updated to accept all bound widget values
 def display_selection(scenario_val, category_val, variable_val, map_val):
@@ -181,7 +263,7 @@ def display_selection(scenario_val, category_val, variable_val, map_val):
 - Category: Select Category  
 - Variable: Select Variable  
 - Map: Choose a Map
-- Table: Choose a Table
+- Summary Table: Choose a Summary Table
 """,
     styles={
         "font-size": "14pt",
@@ -211,6 +293,45 @@ def display_selection(scenario_val, category_val, variable_val, map_val):
 - Map: {map_val}  
 - Path: {path_display}
 """)
+
+
+# Function to display infographic and enable the download button
+def display_infographic(scenario_val, graphic_val):
+    # Show only placeholder names if scenario not selected
+    if scenario_val == 'Select Infographic Scenario' or not scenario_val:
+        download_infographic.disabled = True
+        return pn.pane.Markdown(f"""
+**Selection Options:**
+
+- Scenario: Select Infographic Scenario                                 
+- Infographic: Choose an Infographic
+""",
+    styles={
+        "font-size": "14pt",
+        "line-height": "1.2",
+    })
+    path_display = os.path.join(GRAPHICS_PATH, graphic_val or '')
+
+    # If an image file is selected → display the image
+    if graphic_val and os.path.isfile(path_display) and path_display.lower().endswith('.png'):
+        # Enable download button
+        download_infographic.disabled = False
+        download_infographic.filename = graphic_val
+
+        # Define file download callback
+        def get_file():
+            with open(path_display, "rb") as f:
+                return io.BytesIO(f.read())
+        download_infographic.callback = get_file
+        return pn.pane.PNG(path_display, height=650)
+    download_infographic.disabled = True
+    return pn.pane.Markdown(f"""
+**Selected Options:**
+
+- Scenario: {scenario_val}  
+- Path: {path_display}
+""")
+
 
 # PCIC Logo
 if LOGO_PATH and os.path.isfile(LOGO_PATH):
@@ -248,38 +369,64 @@ display_pane = pn.bind(
     map_val=map
 )
 
-sidebar = pn.Column(
-    pn.pane.Markdown("## 🗺️ Maps", styles={"font-size": "12pt", 
-                                            "font-weight": "bold",
-                                            "margin-top": "0px",
-                                            "margin-bottom": "0px"}),  # 👈 Section title   
+infographic_pane = pn.bind(
+    display_infographic,
+    scenario_val=graphicscen,
+    graphic_val=infographics
+)
+
+mapbar = pn.Column(
+    pn.pane.Markdown("## Maps", styles={"font-size": "10pt", 
+                                        "font-weight": "bold",
+                                        "margin-top": "0px",
+                                        "margin-bottom": "0px"}),  # 👈 Section title   
     scenario, 
     category, 
     variable, 
     map, 
     pn.pane.HTML("<style>.bk-btn {font-size: 16pt !important;}</style>"),
     download_map,
-    pn.layout.Spacer(height=10),
-    pn.layout.Divider(),
-    pn.pane.Markdown("## 📊 Tables", styles={"font-size": "12pt", "font-weight": "bold"}),  # 👈 Second section title
-    tablescen,
-    region,
-    pn.layout.Spacer(height=10),
-    download_table,
-    pn.layout.Spacer(height=10),
-    pn.layout.Divider(),
-    pn.layout.Spacer(height=10),
-    logo_pane,
     width=400,
 )
+
+tablebar = pn.Row(
+    pn.Column(
+    pn.pane.Markdown("## Summary Tables", styles={"font-size": "10pt", "font-weight": "bold"}), 
+    tablescen,
+    region,
+    download_table),
+    pn.Column(
+    pn.pane.Markdown("## Additional Variables", styles={"font-size": "10pt", "font-weight": "bold"}),
+    added,
+    download_added),  
+    width=400,
+)
+
+sideinfo = pn.Column(
+    pn.pane.Markdown("## Infographics", styles={"font-size": "10pt", "font-weight": "bold"}),
+    graphicscen,
+    infographics,
+    download_infographic,
+    pn.layout.Divider(),
+    logo_pane,
+    width=400)
 
 # Layout
 layout = pn.Column(
     title_pane,
     pn.Row(
-        sidebar,
+        mapbar,
         display_pane
     ),
+    pn.layout.Divider(),
+    pn.Row(
+        tablebar
+    ),
+    pn.layout.Divider(),
+    pn.Row(
+        sideinfo,
+        infographic_pane
+    )
 )
 
 layout.servable()
