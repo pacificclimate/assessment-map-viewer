@@ -1,0 +1,27 @@
+# Northeast Assessment Config Options
+base_path: "/storage/data/projects/rci/data/assessments/Metro_Van_2025/App_Files/"
+logo_path: "./PCICLogoHorizontal.png"
+app_title: "Metro Vancouver Assessment Viewer"
+
+category_order:
+  - Precipitation_Indices
+  - Temperature_Indices
+  - Heatwave_Indices
+  - Drought_Indices
+  - Return_Levels
+  - Return_Period_Changes
+  - Snowpack_Indices
+  - Extreme_Wind
+
+region_order:
+  - Metro_Vancouver
+  - North_Vancouver
+  - MV_High_Elevation_400m
+  - MV_Low_Elevation_400m
+  - Capilano_Watershed
+  - Coquitlam_Watershed
+  - Seymour_Watershed
+
+added_tables:
+  - Extreme_Sea_Level
+  - Extreme_Wind
