@@ -10,12 +10,18 @@ category_order:
   - Drought_Indices
   - Return_Levels
   - Return_Period_Changes
+  - Snowpack_Indices
+  - Extreme_Wind
 
 region_order:
   - Metro_Vancouver
   - North_Vancouver
-  - MV_High_Elevation
-  - MV_Low_Elevation
+  - MV_High_Elevation_400m
+  - MV_Low_Elevation_400m
   - Capilano_Watershed
   - Coquitlam_Watershed
   - Seymour_Watershed
+
+added_tables:
+  - Extreme_Sea_Level
+  - Extreme_Wind

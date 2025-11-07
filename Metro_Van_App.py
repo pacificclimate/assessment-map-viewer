@@ -52,7 +52,7 @@ scenario = pn.widgets.Select(
 # Table Scenario Menu
 tablescen = pn.widgets.Select(
     name='Table Scenario', 
-    options=['Select Table Scenario' , 'SSP245', 'SSP585'], 
+    options=['Select Table Scenario' , 'RCP85', 'SSP245', 'SSP585'], 
     value='Select Table Scenario',
     styles={'font-size': '14pt'} 
 )
@@ -210,12 +210,12 @@ def update_added_table(event):
         return
 
     # Construct expected Excel file path
-    added_file = os.path.join(ADDED_PATH, f"{added_name}_Table.xlsx")
+    added_file = os.path.join(ADDED_PATH, ("Metro_Vancouver_" + f"{added_name}_Projections_Summary_Table.xlsx"))
 
     if os.path.isfile(added_file):
         # Enable the button and set callback
         download_added.disabled = False
-        download_added.filename = f"{added_name}_Table.xlsx"
+        download_added.filename = ("Metro_Vancouver_" + f"{added_name}_Projections_Summary_Table.xlsx")
 
         def get_added_file():
             with open(added_file, "rb") as f:
