@@ -5,17 +5,27 @@ import yaml
 
 pn.extension()
 
+# --- Load configuration options once at module level ---
+_config_cache = None
+
+def _load_config():
+    global _config_cache
+    if _config_cache is None:
+        CONFIG_FILE = os.getenv("APP_CONFIG", "config.yaml")
+        
+        if not os.path.isfile(CONFIG_FILE):
+            raise FileNotFoundError(f"Config file not found: {CONFIG_FILE}")
+        
+        with open(CONFIG_FILE, "r") as f:
+            _config_cache = yaml.safe_load(f)
+    
+    return _config_cache
+
 def make_app():
 
-    # --- Load configuration options ---
-    CONFIG_FILE = os.getenv("APP_CONFIG", "config.yaml")
-
-    if not os.path.isfile(CONFIG_FILE):
-        raise FileNotFoundError(f"Config file not found: {CONFIG_FILE}")
-
-    with open(CONFIG_FILE, "r") as f:
-        config = yaml.safe_load(f)
-
+    # Get cached configuration
+    config = _load_config()
+    
     BASE_PATH = config["base_path"]
     CAT_ORDER = config.get("category_order", [])
     REGION_OPTIONS = config.get("region_order", [])
@@ -91,7 +101,7 @@ def make_app():
 
     # Update categories when scenario changes
     def update_categories(event):
-        if scenario.value != 'Select Scenario':
+        if scenario.value != 'Select Map Scenario':
             new_path = os.path.join(MAPS_PATH, scenario.value) #'Maps_'+
             if os.path.isdir(new_path):
                 found_dirs = [d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))]
@@ -114,7 +124,7 @@ def make_app():
 
     # Update variables when category changes
     def update_variables(event):
-        if scenario.value != 'Select Scenario' and category.value:
+        if scenario.value != 'Select Map Scenario' and category.value:
             new_path = os.path.join(MAPS_PATH, scenario.value, category.value) #'Maps_'+
             if os.path.isdir(new_path):
                 dirs = sorted([d for d in os.listdir(new_path) if os.path.isdir(os.path.join(new_path, d))])
@@ -130,7 +140,7 @@ def make_app():
 
     # Update maps when variable changes
     def update_maps(event):
-        if scenario.value != 'Select Scenario' and variable.value:
+        if scenario.value != 'Select Map Scenario' and variable.value:
             new_path = os.path.join(MAPS_PATH, scenario.value, category.value, variable.value) #'Maps_'+
             if os.path.isdir(new_path):
                 files = sorted([f for f in os.listdir(new_path) if os.path.isfile(os.path.join(new_path, f))])
@@ -181,7 +191,7 @@ def make_app():
             return pn.pane.Markdown(f"""
     **Selection Options:**
 
-    - Scenario: Select Scenario  
+    - Scenario: Select Map Scenario  
     - Category: Select Category  
     - Variable: Select Variable  
     - Map: Choose a Map

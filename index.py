@@ -12,7 +12,7 @@ from Metro_Van_App import layout as van_layout
 appver = os.environ.get("APP_VER", "NORTH")
 
 if appver == "NORTH":
-    app = north_app_entrypoint()
+    app = north_app_entrypoint
 else:
     app = van_layout
 
