@@ -12,8 +12,10 @@ from Metro_Van_App import app_entrypoint as metro_van
 appver = os.environ.get("APP_VER", "NORTH")
 
 if appver == "MAP_TABLES":
+    print("Starting MAP_AND_TABLES app...")
     app = map_and_tables
 else:
+    print("Starting METRO_VAN app...")
     app = metro_van
 
 # Configure panel to serve at root
