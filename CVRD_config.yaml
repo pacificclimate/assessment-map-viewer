@@ -1,0 +1,18 @@
+# Cowichan Valley Assessment Config Options
+base_path: "/storage/data/projects/rci/data/assessments/CVRD_2025/App_Files/"
+logo_path: "./PCICLogoHorizontal.png"
+app_title: "Cowichan Valley Assessment Viewer"
+
+category_order:
+  - Precipitation_Indices
+  - Temperature_Indices
+  - Heatwave_Indices
+  - Drought_Indices
+  - Return_Levels
+  - Return_Period_Changes
+
+region_order:
+  - Cowichan_Valley_RD
+  - Developed_Area_Watersheds
+  - Water_Supply_Watersheds
+  - West_Coast_Watersheds
