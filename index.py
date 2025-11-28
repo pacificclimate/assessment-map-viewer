@@ -6,15 +6,15 @@ Simple index file container to serve the app at root instead of /Map_and_Tables_
 """
 
 # Import the main app
-from Map_and_Tables_App import app_entrypoint as north_app_entrypoint
-from Metro_Van_App import app_entrypoint as van_app_entrypoint
+from Map_and_Tables_App import app_entrypoint as map_and_tables
+from Metro_Van_App import app_entrypoint as metro_van
 
 appver = os.environ.get("APP_VER", "NORTH")
 
-if appver == "NORTH":
-    app = north_app_entrypoint
+if appver == "MAP_TABLES":
+    app = map_and_tables
 else:
-    app = van_app_entrypoint
+    app = metro_van
 
 # Configure panel to serve at root
 pn.serve(app, port=8080, address="0.0.0.0", allow_websocket_origin=["*"], 
